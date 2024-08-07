@@ -68,7 +68,7 @@ class RoomInfos:
         disableSkybox = "true" if self.disableSky else "false"
         disableSunMoon = "true" if self.disableSunMoon else "false"
 
-        roomBehaviorArgs = f"{self.roomBehavior}, {self.playerIdleType}, {showInvisActors}, {disableWarpSongs}"
+        roomBehaviorArgs = f"{self.roomBehavior}, {self.playerIdleType}, {showInvisActors}, {disableWarpSongs}, 0, 0"
         cmdList = [
             f"SCENE_CMD_ECHO_SETTINGS({self.echo})",
             f"SCENE_CMD_ROOM_BEHAVIOR({roomBehaviorArgs})",

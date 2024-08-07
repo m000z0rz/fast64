@@ -277,7 +277,7 @@ ootEnumGlobalObject = [
     ("Custom", "Custom", "Custom"),
     ("OBJECT_INVALID", "None", "None"),
     ("OBJECT_GAMEPLAY_FIELD_KEEP", "Overworld", "gameplay_field_keep"),
-    ("OBJECT_GAMEPLAY_DANGEON_KEEP", "Dungeon", "gameplay_dangeon_keep"),
+    ("GAMEPLAY_DANGEON_KEEP", "Dungeon", "gameplay_dangeon_keep"),
 ]
 
 ootEnumNaviHints = [

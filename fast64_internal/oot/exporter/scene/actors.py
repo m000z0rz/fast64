@@ -220,7 +220,7 @@ class SceneSpawns(Utility):
         """Returns the spawn array"""
 
         spawnList = CData()
-        listName = f"Spawn {self.name}"
+        listName = f"EntranceEntry {self.name}"
 
         # .h
         spawnList.header = f"extern {listName}[];\n"
