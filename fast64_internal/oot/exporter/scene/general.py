@@ -201,6 +201,7 @@ class SceneInfos:
                     f"SCENE_CMD_SOUND_SETTINGS({self.specID}, {self.ambienceID}, {self.sequenceID})",
                     # f"SCENE_CMD_MISC_SETTINGS({self.sceneCamType}, {self.worldMapLocation})",
                     f"SCENE_CMD_SPECIAL_FILES({self.naviHintType}, {self.keepObjectID})",
+                    f"SCENE_CMD_ACTOR_CUTSCENE_LIST(0, NULL)",
                     f"SCENE_CMD_SKYBOX_SETTINGS(0x00, {self.skyboxID}, {self.skyboxConfig}, {lights.envLightMode})",
                 ]
             )
