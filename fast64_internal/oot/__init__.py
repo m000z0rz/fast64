@@ -1,7 +1,7 @@
 import bpy
 from bpy.utils import register_class, unregister_class
 
-from .scene.operators import scene_ops_register, scene_ops_unregister
+from .scene.operators import scene_ops_register, scene_ops_unregister, OOT_WriteSceneMakefile
 from .scene.properties import OOTBootupSceneOptions, scene_props_register, scene_props_unregister
 from .scene.panels import scene_panels_register, scene_panels_unregister
 
