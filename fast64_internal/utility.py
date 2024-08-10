@@ -115,7 +115,8 @@ def unhideAllAndGetHiddenState(scene):
 
     if bpy.context.mode != "OBJECT":
         bpy.ops.object.mode_set(mode="OBJECT")
-    bpy.ops.object.hide_view_clear()
+    if bpy.ops.object.hide_view_clear.poll():
+        bpy.ops.object.hide_view_clear()
 
     hiddenLayerCols = []
 
