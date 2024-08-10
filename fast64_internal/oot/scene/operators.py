@@ -8,7 +8,7 @@ from bpy.utils import register_class, unregister_class
 from bpy.ops import object
 from mathutils import Matrix, Vector
 from ...f3d.f3d_gbi import TextureExportSettings, DLFormat
-from ...utility import PluginError, raisePluginError, ootGetSceneOrRoomHeader
+from ...utility import PluginError, raisePluginError, ootGetSceneOrRoomHeader, checkObjectReference
 from ..oot_utility import ExportInfo, RemoveInfo, sceneNameFromID
 from ..oot_constants import ootEnumMusicSeq, ootEnumSceneID
 from ..importer import parseScene
@@ -122,6 +122,87 @@ class OOT_ImportScene(Operator):
             raisePluginError(self, e)
             return {"CANCELLED"}
 
+class OOT_WriteSceneMakefile(Operator):
+    """Writes a makefile defining which files a scene export generates."""
+    bl_idname = "object.oot_export_level_makefile"
+    bl_label = "Generate Makefil"
+    bl_options = {"REGISTER"}
+    subdir: bpy.props.StringProperty(default="./")
+
+    def execute(self, context):
+        activeObj = None
+        try:
+            if context.mode != "OBJECT":
+                object.mode_set(mode="OBJECT")
+            activeObj = context.view_layer.objects.active
+
+            obj = context.scene.ootSceneExportObj
+            if obj is None:
+                # TODO: Should write empty makefile here?
+                raise PluginError("Scene object input not set.")
+            elif obj.type != "EMPTY" or obj.ootEmptyType != "Scene":
+                raise PluginError("The input object is not an empty with the Scene type.")
+
+            scaleValue = context.scene.ootBlenderScale
+            finalTransform = Matrix.Diagonal(Vector((scaleValue, scaleValue, scaleValue))).to_4x4()
+
+            settings = context.scene.ootSceneExportSettings
+            levelName = settings.name
+            option = settings.option
+
+            bootOptions = context.scene.fast64.oot.bootupSceneOptions
+            hackerFeaturesEnabled = context.scene.fast64.oot.hackerFeaturesEnabled
+
+            if settings.customExport:
+                isCustomExport = True
+                exportPath = bpy.path.abspath(settings.exportPath)
+                customSubPath = None
+            else:
+                if option == "Custom":
+                    customSubPath = "assets/scenes/" + settings.subFolder + "/"
+                else:
+                    levelName = sceneNameFromID(option)
+                    customSubPath = None
+                isCustomExport = False
+                exportPath = bpy.path.abspath(context.scene.ootDecompPath)
+
+            exportInfo = ExportInfo(
+                isCustomExport,
+                exportPath,
+                customSubPath,
+                levelName,
+                option,
+                bpy.context.scene.saveTextures,
+                settings.singleFile,
+                context.scene.fast64.oot.useDecompFeatures if not hackerFeaturesEnabled else hackerFeaturesEnabled,
+                bootOptions if hackerFeaturesEnabled else None,
+            )
+
+            scene = SceneExport.create_scene(obj, finalTransform, exportInfo)
+
+
+            depfileLocal=bpy.context.blend_data.filepath.replace('.blend', '.d')            # without subdir
+
+            blendfile = f"{self.subdir}{bpy.path.basename(bpy.context.blend_data.filepath)}"
+            depfile = f"{self.subdir}{depfileLocal}"
+            sceneCFile = f"{self.subdir}{scene.name}.c"
+            sceneHFile = f"{self.subdir}{scene.name}.h"
+            roomCFiles = " ".join([f"{self.subdir}{r.name}.c" for r in scene.rooms.entries])
+            makefileContents = "\n".join([
+                f"GENERATED_MOD_SCENE_C_FILES := $(GENERATED_MOD_SCENE_C_FILES) {sceneCFile} {roomCFiles}",
+                f"{sceneCFile} {sceneHFile} {roomCFiles} &: {blendfile}",
+                f"\tblender $< --background --python-exit-code 1 --python-expr \"import bpy ; bpy.ops.object.mode_set(mode = 'OBJECT') ; bpy.ops.object.oot_export_level()\""
+            ])
+
+            with open(depfileLocal, "w") as f:
+                f.write(makefileContents)
+
+            return {"FINISHED"}
+
+
+        except Exception as e:
+            raisePluginError(self, e)
+            return {"CANCELLED"}
 
 class OOT_ExportScene(Operator):
     """Export an OOT scene."""
@@ -254,6 +335,7 @@ classes = (
     OOT_SearchSceneEnumOperator,
     OOT_ClearBootupScene,
     OOT_ImportScene,
+    OOT_WriteSceneMakefile,
     OOT_ExportScene,
     OOT_RemoveScene,
 )
