@@ -295,7 +295,7 @@ def exportCollisionToC(
             if not isCustomExport:
                 colData.source += f'#include "{folderName}.h"\n\n'
             else:
-                colData.source += "\n"
+                colData.source += f"#include \"{exportSettings.filename}.h\"\n\n"
             colData.append(
                 CollisionHeader.new(
                     f"{name}_collisionHeader",
