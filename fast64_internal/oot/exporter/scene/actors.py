@@ -159,7 +159,7 @@ class SceneEntranceActors:
 
                 entranceActor.id = "ACTOR_PLAYER" if not entranceProp.customActor else actorProp.actor_id_custom
                 entranceActor.pos = pos
-                flags = [0x00, 0x7F, 0x00]  # y flags of 7F important to skip cutscene at entrance
+                flags = [0x00, 0x00, 0x00]
                 entranceActor.rot = ", ".join(f"SPAWN_ROT_FLAGS(DEG_TO_BINANG({(r * (180 / 0x8000)):.3f}), 0x{f:04X})" for r, f in zip(rot, flags))
                 entranceActor.params = actorProp.params if not entranceProp.customActor else actorProp.params_custom
                 if entranceProp.tiedRoom is not None:

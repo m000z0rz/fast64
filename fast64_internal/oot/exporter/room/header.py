@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 from mathutils import Matrix
 from bpy.types import Object
-from ....utility import CData, indent
+from ....utility import CData, indent, hexOrDecInt
 from ...oot_utility import getObjectList
 from ...oot_constants import ootData
 from ...room.properties import OOTRoomHeaderProperty
@@ -139,20 +139,71 @@ class RoomActors:
 
     @staticmethod
     def get_rotation_values(actorProp: OOTActorProperty, blender_rot_values: list[int]):
-        # Figure out which rotation to export, Blender's or the override
-        custom = "_custom" if actorProp.actor_id == "Custom" else ""
-        rot_values = [getattr(actorProp, f"rot_{rot}{custom}") for rot in ["x", "y", "z"]]
-        export_rot_values = [f"DEG_TO_BINANG({(rot * (180 / 0x8000)):.3f})" for rot in blender_rot_values]
+        if True:
+            csId = actorProp.cutsceneId
+            halfDayBits = actorProp.halfDayBits
 
-        if actorProp.actor_id == "Custom":
-            export_rot_values = rot_values if actorProp.rot_override else export_rot_values
+            halfDayBitsNum: int = hexOrDecInt(str(halfDayBits))
+            halfDayBitsLower = hex(halfDayBitsNum & 0x7F)
+            halfDayBitsUpper = hex(halfDayBitsNum >> 7 & 0x7)
+
+            rotFlags = [halfDayBitsUpper, csId, halfDayBitsLower]
+
+            custom = "_custom" if actorProp.actor_id == "Custom" else ""
+            #rot_values = [getattr(actorProp, f"rot_{rot}{custom}") for rot in ["x", "y", "z"]]
+            override_rot_values = [getattr(actorProp, f"rot_{rot}{custom}") for rot in ["x", "y", "z"]]
+            override_rot_with_flags = [
+                f"SPAWN_ROT_FLAGS({r}, {f})"
+                for r, f in zip(override_rot_values, rotFlags)
+            ]
+            export_rot_values = [
+                f"SPAWN_ROT_FLAGS(DEG_TO_BINANG({(rot * (180 / 0x8000)):.3f}), {f})"
+                for r, f in zip(
+                    blender_rot_values,
+                    rotFlags
+                )
+            ]
+
+            if actorProp.actor_id == "Custom":
+                export_rot_values = override_rot_with_flags if actorProp.rot_override else export_rot_values
+            else:
+                for i, rot in enumerate(["X", "Y", "Z"]):
+                    if actorProp.is_rotation_used(f"{rot}Rot"):
+                        export_rot_values[i] = override_rot_with_flags[i]
+
+            assert len(export_rot_values) == 3
+            return export_rot_values
+
+            # if actorProp.rotOverride:
+            #     actor.rot = ", ".join(
+            #         f"SPAWN_ROT_FLAGS({r}, {f}"
+            #         for r, f in zip(
+            #             [actorProp.rotOverrideX, actorProp.rotOverrideY, actorProp.rotOverrideZ],
+            #             rotFlags
+            #         ))
+            # else:
+            #     actor.rot = ", ".join(
+            #         f"SPAWN_ROT_FLAGS(DEG_TO_BINANG({(r * (180 / 0x8000)):.3f}), {f})"
+            #         for r, f in zip(
+            #             blender_rot_values,
+            #             rotFlags
+            #         ))
         else:
-            for i, rot in enumerate(["X", "Y", "Z"]):
-                if actorProp.is_rotation_used(f"{rot}Rot"):
-                    export_rot_values[i] = rot_values[i]
+            # Current logic in fast64, not m000z0rz's MM stuff
+            # Figure out which rotation to export, Blender's or the override
+            custom = "_custom" if actorProp.actor_id == "Custom" else ""
+            rot_values = [getattr(actorProp, f"rot_{rot}{custom}") for rot in ["x", "y", "z"]]
+            export_rot_values = [f"DEG_TO_BINANG({(rot * (180 / 0x8000)):.3f})" for rot in blender_rot_values]
 
-        assert len(export_rot_values) == 3
-        return export_rot_values
+            if actorProp.actor_id == "Custom":
+                export_rot_values = rot_values if actorProp.rot_override else export_rot_values
+            else:
+                for i, rot in enumerate(["X", "Y", "Z"]):
+                    if actorProp.is_rotation_used(f"{rot}Rot"):
+                        export_rot_values[i] = rot_values[i]
+
+            assert len(export_rot_values) == 3
+            return export_rot_values
 
     @staticmethod
     def new(

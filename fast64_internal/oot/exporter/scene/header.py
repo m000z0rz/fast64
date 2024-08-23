@@ -41,10 +41,34 @@ class SceneHeader:
             ScenePathways.new(f"{name}_pathway", sceneObj, transform, headerIndex),
         )
 
+    def defaultCutsceneEntryList(self) -> CData:
+        print("in defaultCutsceneEntryList")
+        cutsceneEntryList = CData()
+        cutsceneEntryList.header = f"extern CutsceneEntry {self.name}_cutsceneEntryList[0xA];"
+        cutsceneEntryList.source = (
+            f"CutsceneEntry {self.name}_cutsceneEntryList[] = {{\n" +
+            "\t/* 0x0 */ {700, -1, -3, -1, 1, CS_END_SFX_NONE, 255, 0, 0, 27},\n" +
+            "\t/* 0x1 */ {600, -1, -2, -1, 2, CS_END_SFX_NONE, 255, 0, 0, 27},\n" +
+            "\t/* 0x2 */ {700, -1, -4, -1, 3, CS_END_SFX_NONE, 255, 0, 1, 27},\n" +
+            "\t/* 0x3 */ {700, -1, -5, -1, 4, CS_END_SFX_NONE, 255, 0, 0, 27},\n" +
+            "\t/* 0x4 */ {500, -1, -7, -1, 5, CS_END_SFX_NONE, 255, 0, 0, 32},\n" +
+            "\t/* 0x5 */ {400, -1, -11, -1, 6, CS_END_SFX_NONE, 255, 0, 1, 32},\n" +
+            "\t/* 0x6 */ {100, -1, -8, -1, 7, CS_END_SFX_NONE, 255, 0, 0, 32},\n" +
+            "\t/* 0x7 */ {200, -1, -9, -1, 8, CS_END_SFX_NONE, 255, 0, 0, 32},\n" +
+            "\t/* 0x8 */ {800, -1, -6, -1, -1, CS_END_SFX_NONE, 255, 0, 0, 32},\n" +
+            "\t/* 0x9 */ {900, 135, -10, -1, -1, CS_END_SFX_NONE, 1, 0, 0, 32},\n" +
+            "};\n\n"
+        )
+
+        return cutsceneEntryList
+
     def getC(self):
         """Returns the ``CData`` containing the header's data"""
 
         headerData = CData()
+
+        # Write the default player cutscene list
+        headerData.append(self.defaultCutsceneEntryList())
 
         # Write the spawn position list data and the entrance list
         if len(self.entranceActors.entries) > 0:

@@ -173,6 +173,8 @@ class OOTActorProperty(PropertyGroup):
     # only used for actors with the id "Custom"
     # because of the get/set functions we need a way to input any value
     params_custom: StringProperty(name="Actor Parameter", default="0x0000")
+    cutsceneId: StringProperty(name="Cutscene ID", default="0x7F")
+    halfDayBits: StringProperty(name="Half Day Bits", default="0x000")  # 3FF is the same?
     rot_override: BoolProperty(name="Override Rotation", default=False)
     rot_x_custom: StringProperty(name="Rot X", default="0x0000")
     rot_y_custom: StringProperty(name="Rot Y", default="0x0000")
@@ -455,6 +457,9 @@ class OOTActorProperty(PropertyGroup):
             paramBox.prop(self, "params", text="")
         else:
             paramBox.prop(self, "params_custom", text="")
+
+        prop_split(paramBox, self, "cutsceneId", "Cutscene ID")
+        prop_split(paramBox, self, "halfDayBits", "Half Day Bits")
 
         rotations_used = []
         if self.rot_override:

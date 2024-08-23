@@ -125,6 +125,7 @@ class Scene:
             + self.colHeader.getCmd()
             + self.rooms.getCmd()
             + curHeader.infos.getCmds(curHeader.lighting)
+            + f"{indent}SCENE_CMD_ACTOR_CUTSCENE_LIST(0xA, {curHeader.name}_cutsceneEntryList),\n"
             + curHeader.lighting.getCmd()
             + curHeader.path.getCmd()
             + (curHeader.transitionActors.getCmd() if len(curHeader.transitionActors.entries) > 0 else "")
