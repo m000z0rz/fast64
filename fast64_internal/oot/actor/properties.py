@@ -111,6 +111,8 @@ class OOTActorProperty(PropertyGroup):
     actorID: EnumProperty(name="Actor", items=ootData.actorData.ootEnumActorID, default="ACTOR_PLAYER")
     actorIDCustom: StringProperty(name="Actor ID", default="ACTOR_PLAYER")
     actorParam: StringProperty(name="Actor Parameter", default="0x0000")
+    cutsceneId: StringProperty(name="Cutscene ID", default="0x7F")
+    halfDayBits: StringProperty(name="Half Day Bits", default="0x000")  # 3FF is the same?
     rotOverride: BoolProperty(name="Override Rotation", default=False)
     rotOverrideX: StringProperty(name="Rot X", default="0")
     rotOverrideY: StringProperty(name="Rot Y", default="0")
@@ -145,6 +147,8 @@ class OOTActorProperty(PropertyGroup):
 
         # layout.box().label(text = 'Actor IDs defined in include/z64actors.h.')
         prop_split(actorIDBox, self, "actorParam", "Actor Parameter")
+        prop_split(actorIDBox, self, "cutsceneId", "Cutscene ID")
+        prop_split(actorIDBox, self, "halfDayBits", "Half Day Bits")
 
         actorIDBox.prop(self, "rotOverride", text="Override Rotation (ignore Blender rot)")
         if self.rotOverride:

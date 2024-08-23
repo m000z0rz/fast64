@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 from mathutils import Matrix
 from bpy.types import Object
-from ....utility import CData, indent
+from ....utility import CData, indent, hexOrDecInt
 from ...oot_utility import getObjectList
 from ...oot_constants import ootData
 from ...room.properties import OOTRoomHeaderProperty
@@ -159,10 +159,29 @@ class RoomActors:
                 else:
                     actor.id = actorProp.actorID
 
+                csId = actorProp.cutsceneId
+                halfDayBits = actorProp.halfDayBits
+
+                halfDayBitsNum: int = hexOrDecInt(str(halfDayBits))
+                halfDayBitsLower = hex(halfDayBitsNum & 0x7F)
+                halfDayBitsUpper = hex(halfDayBitsNum >> 7 & 0x7)
+
+                rotFlags = [halfDayBitsUpper, csId, halfDayBitsLower]
+
                 if actorProp.rotOverride:
-                    actor.rot = ", ".join([actorProp.rotOverrideX, actorProp.rotOverrideY, actorProp.rotOverrideZ])
+                    actor.rot = ", ".join(
+                        f"SPAWN_ROT_FLAGS({r}, {f}"
+                        for r, f in zip(
+                            [actorProp.rotOverrideX, actorProp.rotOverrideY, actorProp.rotOverrideZ],
+                            rotFlags
+                        ))
                 else:
-                    actor.rot = ", ".join(f"DEG_TO_BINANG({(r * (180 / 0x8000)):.3f})" for r in rot)
+                    actor.rot = ", ".join(
+                        f"SPAWN_ROT_FLAGS(DEG_TO_BINANG({(r * (180 / 0x8000)):.3f}), {f})"
+                        for r, f in zip(
+                            rot,
+                            rotFlags
+                        ))
 
                 actor.name = (
                     ootData.actorData.actorsByID[actorProp.actorID].name.replace(
