@@ -157,7 +157,7 @@ class RoomActors:
                 for r, f in zip(override_rot_values, rotFlags)
             ]
             export_rot_values = [
-                f"SPAWN_ROT_FLAGS(DEG_TO_BINANG({(rot * (180 / 0x8000)):.3f}), {f})"
+                f"SPAWN_ROT_FLAGS(DEG_TO_BINANG({(r * (180 / 0x8000)):.3f}), {f})"
                 for r, f in zip(
                     blender_rot_values,
                     rotFlags
